@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GitHub 代理扫描器</title>
+    <link rel="stylesheet" href="/assets/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>GitHub 代理扫描器</h1>
+        <p id="statusLine">空闲</p>
+      </div>
+      <div class="topbar-actions">
+        <a class="button secondary" href="/download/proxies.csv">导出候选 CSV</a>
+        <a class="button secondary" href="/download/verified.csv">导出验证 CSV</a>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel controls">
+        <div class="panel-header">
+          <h2>扫描</h2>
+          <span id="scanBadge" class="badge">空闲</span>
+        </div>
+
+        <label>
+          GitHub Token
+          <input id="token" type="password" autocomplete="off" placeholder="github_pat_xxx">
+        </label>
+
+        <div class="split">
+          <label>
+            Token 环境变量
+            <input id="tokenEnv" type="text" value="GITHUB_TOKEN">
+          </label>
+          <label>
+            页数
+            <input id="pages" type="number" min="1" value="1">
+          </label>
+        </div>
+
+        <div class="split">
+          <label>
+            每页数量
+            <input id="perPage" type="number" min="1" max="100" value="50">
+          </label>
+          <label>
+            请求间隔（秒）
+            <input id="minDelaySeconds" type="number" min="0.1" step="0.1" value="2">
+          </label>
+        </div>
+
+        <label>
+          最大文件字节数
+          <input id="maxFileBytes" type="number" min="1024" value="524288">
+        </label>
+
+        <label>
+          搜索词
+          <textarea id="queries" rows="8" spellcheck="false"></textarea>
+        </label>
+
+        <label class="checkbox-row">
+          <input id="includeNonPublic" type="checkbox">
+          <span>包含非公网地址</span>
+        </label>
+
+        <div class="button-row">
+          <button id="startScan" class="button primary" type="button">开始扫描</button>
+          <button id="stopJob" class="button danger" type="button">停止任务</button>
+        </div>
+      </section>
+
+      <section class="panel verify">
+        <div class="panel-header">
+          <h2>验证</h2>
+          <span id="verifyBadge" class="badge">手动</span>
+        </div>
+
+        <label>
+          检查 URL
+          <input id="checkUrl" type="url" placeholder="https://your-domain.example/ip">
+        </label>
+
+        <div class="split">
+          <label>
+            超时秒数
+            <input id="timeoutSeconds" type="number" min="1" step="0.5" value="8">
+          </label>
+          <label>
+            验证数量
+            <input id="verifyLimit" type="number" min="1" placeholder="全部">
+          </label>
+        </div>
+
+        <button id="startVerify" class="button primary" type="button">开始验证</button>
+      </section>
+
+      <section class="panel metrics">
+        <div class="metric">
+          <span>总数</span>
+          <strong id="totalCount">0</strong>
+        </div>
+        <div class="metric">
+          <span>新增</span>
+          <strong id="newCount">0</strong>
+        </div>
+        <div class="metric">
+          <span>本次提取</span>
+          <strong id="extractedCount">0</strong>
+        </div>
+        <div class="metric">
+          <span>已验证</span>
+          <strong id="checkedCount">0</strong>
+        </div>
+      </section>
+
+      <section class="panel results">
+        <div class="panel-header">
+          <h2>结果</h2>
+          <input id="resultFilter" class="filter" type="search" placeholder="筛选">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>代理地址</th>
+                <th>协议</th>
+                <th>来源</th>
+                <th>行号</th>
+                <th>发现时间</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel logs">
+        <div class="panel-header">
+          <h2>日志</h2>
+          <button id="refresh" class="button secondary" type="button">刷新</button>
+        </div>
+        <pre id="logs"></pre>
+      </section>
+    </main>
+
+    <script src="/assets/app.js"></script>
+  </body>
+</html>

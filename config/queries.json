@@ -1,0 +1,16 @@
+{
+  "queries": [
+    "\"http://\" \"proxy\" extension:txt",
+    "\"https://\" \"proxy\" extension:txt",
+    "\"socks5://\" extension:txt",
+    "\"socks4://\" extension:txt",
+    "filename:proxies.txt \"http://\"",
+    "filename:proxy.txt \"http\"",
+    "filename:proxy-list.txt \"socks5\"",
+    "\"free proxies\" extension:txt"
+  ],
+  "pages_per_query": 1,
+  "per_page": 50,
+  "min_delay_seconds": 2.0,
+  "max_file_bytes": 524288
+}

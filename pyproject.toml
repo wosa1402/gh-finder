@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "github-proxy-scanner"
+version = "0.1.0"
+description = "A rate-limited GitHub public code proxy candidate scanner."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+authors = [
+  { name = "Local project" }
+]
+
+[project.scripts]
+github-proxy-scanner = "github_proxy_scanner.cli:main"
+github-proxy-scanner-web = "github_proxy_scanner.web:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+github_proxy_scanner = ["web_assets/*"]
