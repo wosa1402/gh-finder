@@ -164,7 +164,11 @@ def run_scan_once(
         print(f"[scan] files: {len(results)}", file=sys.stderr)
 
         for result in results:
-            text = client.fetch_file_text(result, max_file_bytes=max_file_bytes)
+            try:
+                text = client.fetch_file_text(result, max_file_bytes=max_file_bytes)
+            except GitHubAPIError as exc:
+                print(f"[scan] skip {result.repository}/{result.path}: {exc}", file=sys.stderr)
+                continue
             if text is None:
                 continue
             found = extract_candidates(

@@ -345,7 +345,11 @@ def run_scan_job(state: WebState, config: dict[str, Any]) -> None:
             for result in results:
                 if state.stop_event.is_set():
                     break
-                text = client.fetch_file_text(result, max_file_bytes=config["max_file_bytes"])
+                try:
+                    text = client.fetch_file_text(result, max_file_bytes=config["max_file_bytes"])
+                except GitHubAPIError as exc:
+                    state.log(f"跳过文件 {result.repository}/{result.path}：{exc}")
+                    continue
                 if text is None:
                     continue
                 found = extract_candidates(

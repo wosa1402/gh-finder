@@ -101,10 +101,12 @@ class GitHubClient:
 
         for attempt in range(self.max_retries + 1):
             self._throttle()
-            request = urllib.request.Request(url, headers=headers)
             try:
+                request = urllib.request.Request(url, headers=headers)
                 with urllib.request.urlopen(request, timeout=self.timeout_seconds) as response:
                     return response.read()
+            except ValueError as exc:
+                raise GitHubAPIError(f"Invalid GitHub API URL: {url}") from exc
             except urllib.error.HTTPError as exc:
                 body = exc.read().decode("utf-8", errors="replace")
                 if exc.code in {403, 429} and attempt < self.max_retries:
@@ -128,10 +130,17 @@ class GitHubClient:
             url = f"{self.base_url.rstrip('/')}/{path_or_url.lstrip('/')}"
 
         if not params:
-            return url
+            return self._sanitize_url(url)
 
         separator = "&" if "?" in url else "?"
-        return f"{url}{separator}{urllib.parse.urlencode(params)}"
+        return self._sanitize_url(f"{url}{separator}{urllib.parse.urlencode(params)}")
+
+    def _sanitize_url(self, url: str) -> str:
+        parts = urllib.parse.urlsplit(url)
+        path = urllib.parse.quote(parts.path, safe="/%:@")
+        query = urllib.parse.quote(parts.query, safe="=&%:+,/?@")
+        fragment = urllib.parse.quote(parts.fragment, safe="=&%:+,/?@")
+        return urllib.parse.urlunsplit((parts.scheme, parts.netloc, path, query, fragment))
 
     def _throttle(self) -> None:
         elapsed = time.monotonic() - self._last_request_at
