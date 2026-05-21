@@ -23,6 +23,8 @@ from .storage import append_candidates, load_proxy_values, write_verification_re
 from .verifier import verify_proxy
 
 ASSET_DIR = Path(__file__).with_name("web_assets")
+DEFAULT_CHECK_URL = "http://example.com/"
+DEFAULT_VERIFY_LIMIT = 200
 
 
 @dataclass
@@ -241,6 +243,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
             "output": str(self.app_state.output_path),
             "jsonl": str(self.app_state.jsonl_path),
             "verifiedOutput": str(self.app_state.verified_output_path),
+            "defaultCheckUrl": DEFAULT_CHECK_URL,
+            "defaultVerifyLimit": DEFAULT_VERIFY_LIMIT,
         }
 
     def build_scan_config(self, payload: dict[str, Any]) -> dict[str, Any]:
@@ -267,12 +271,12 @@ class DashboardHandler(BaseHTTPRequestHandler):
         }
 
     def build_verify_config(self, payload: dict[str, Any]) -> dict[str, Any]:
-        check_url = str(payload.get("checkUrl") or "").strip()
+        check_url = str(payload.get("checkUrl") or DEFAULT_CHECK_URL).strip()
         if not check_url.startswith(("http://", "https://")):
             raise ValueError("检查 URL 必须以 http:// 或 https:// 开头。")
 
         limit = payload.get("limit")
-        parsed_limit = None if limit in (None, "") else positive_int(limit, "验证数量")
+        parsed_limit = DEFAULT_VERIFY_LIMIT if limit in (None, "") else positive_int(limit, "验证数量")
         return {
             "check_url": check_url,
             "timeout_seconds": positive_float(payload.get("timeoutSeconds", 8.0), "超时秒数"),

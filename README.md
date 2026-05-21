@@ -94,8 +94,10 @@ Web 控制台提供：
 验证不会在扫描时自动执行。你需要明确指定检查 URL：
 
 ```powershell
-github-proxy-scanner verify --input data/proxies.csv --output data/verified.csv --check-url https://your-domain.example/ip
+github-proxy-scanner verify --input data/proxies.csv --output data/verified.csv --check-url http://example.com/
 ```
+
+Web 控制台默认使用 `http://example.com/` 作为检查 URL，并默认只验证 200 条。确认结果正常后，再手动调大验证数量。
 
 内置验证器只使用 Python 标准库，支持 HTTP/HTTPS 代理；SOCKS 候选会被标记为 `skipped`。
 

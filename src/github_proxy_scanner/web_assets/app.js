@@ -51,6 +51,8 @@ async function loadConfig() {
   el("minDelaySeconds").value = config.minDelaySeconds || 2;
   el("maxFileBytes").value = config.maxFileBytes || 524288;
   el("tokenEnv").value = config.tokenEnv || "GITHUB_TOKEN";
+  el("checkUrl").value = config.defaultCheckUrl || "http://example.com/";
+  el("verifyLimit").value = config.defaultVerifyLimit || 200;
 }
 
 async function startScan() {
