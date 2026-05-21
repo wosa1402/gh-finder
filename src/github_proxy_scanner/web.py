@@ -311,19 +311,25 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
     def send_json(self, payload: dict[str, Any], status: HTTPStatus = HTTPStatus.OK) -> None:
         data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Cache-Control", "no-store")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
+        try:
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+        except (BrokenPipeError, ConnectionAbortedError, ConnectionResetError):
+            return
 
     def send_bytes(self, data: bytes, *, content_type: str) -> None:
-        self.send_response(HTTPStatus.OK)
-        self.send_header("Content-Type", content_type)
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
+        try:
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+        except (BrokenPipeError, ConnectionAbortedError, ConnectionResetError):
+            return
 
 
 def run_scan_job(state: WebState, config: dict[str, Any]) -> None:
@@ -442,15 +448,17 @@ def read_csv_rows(path: Path, *, limit: int) -> dict[str, Any]:
     if not path.exists():
         return {"rows": [], "count": 0, "path": str(path)}
 
+    rows: deque[dict[str, str]] = deque(maxlen=limit if limit > 0 else None)
+    total = 0
     with path.open("r", newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
-        rows = list(reader)
+        for row in reader:
+            total += 1
+            rows.append(row)
 
-    total = len(rows)
-    if limit > 0:
-        rows = rows[-limit:]
-    rows.reverse()
-    return {"rows": rows, "count": total, "path": str(path)}
+    latest_rows = list(rows)
+    latest_rows.reverse()
+    return {"rows": latest_rows, "count": total, "path": str(path)}
 
 
 def parse_limit(value: str, *, default: int) -> int:
